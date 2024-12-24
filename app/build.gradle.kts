@@ -37,7 +37,16 @@ android {
 }
 
 // Add publishing configuration
-
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            from(components["release"])
+            groupId = "com.application"
+            artifactId = "safesecure"
+            version = "1.0"
+        }
+    }
+}
 dependencies {
     implementation("androidx.activity:activity:1.7.2")
     implementation("androidx.core:core-ktx:1.10.1")
