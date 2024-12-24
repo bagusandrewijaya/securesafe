@@ -32,15 +32,31 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 }
 
+// Add publishing configuration
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "com.application"
+            artifactId = "safesecure"
+            version = "1.0.0"
+            afterEvaluate {
+                from components.release
+            }
+
+        }
+    }
+}
+
+
 dependencies {
 
-    implementation("androidx.activity:activity:1.7.2")  // downgrade dari 1.8.0
-    implementation("androidx.core:core-ktx:1.10.1")    // downgrade dari 1.12.0
-    implementation("androidx.core:core:1.10.1")        // downgrade dari 1.12.0
+    implementation("androidx.activity:activity:1.7.2")
+    implementation("androidx.core:core-ktx:1.10.1")
+    implementation("androidx.core:core:1.10.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
