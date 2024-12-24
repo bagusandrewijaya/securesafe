@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.application.safesecure"
-    compileSdk = 34
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.application.safesecure"
