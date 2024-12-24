@@ -1,4 +1,3 @@
-// SafeSecureLibs.kt
 package com.application.safesecurelibs
 
 import android.content.Context
@@ -8,32 +7,56 @@ import android.provider.Settings
 import java.io.File
 import java.io.BufferedReader
 import java.io.InputStreamReader
-//add notes
+import android.util.Log
+
 class SafeSecureLibs(private val context: Context) {
+    companion object {
+        private const val TAG = "SafeSecureLibs"
+    }
 
     fun getSecurityStatus(): Map<String, Boolean> {
-        return mapOf(
-            "isDevModeEnabled" to isDevModeEnabled(),
-            "isRooted" to isDeviceRooted(),
-            "hasDangerousApps" to checkForDangerousApps(),
-            "hasHiddenProperties" to checkHiddenProperties()
-        )
+        return try {
+            mapOf(
+                "isDevModeEnabled" to isDevModeEnabled(),
+                "isRooted" to isDeviceRooted(),
+                "hasDangerousApps" to checkForDangerousApps(),
+                "hasHiddenProperties" to checkHiddenProperties()
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting security status", e)
+            mapOf(
+                "isDevModeEnabled" to false,
+                "isRooted" to false,
+                "hasDangerousApps" to false,
+                "hasHiddenProperties" to false
+            )
+        }
     }
 
     fun isDevModeEnabled(): Boolean {
-        return Settings.Global.getInt(
-            context.contentResolver,
-            Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
-            0
-        ) != 0
+        return try {
+            Settings.Global.getInt(
+                context.contentResolver,
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+                0
+            ) != 0
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking dev mode", e)
+            false
+        }
     }
 
     fun isDeviceRooted(): Boolean {
-        return checkRootMethod1() ||
-                checkRootMethod2() ||
-                checkRootMethod3() ||
-                checkForMagiskFiles() ||
-                checkForBusyboxBinary()
+        return try {
+            checkRootMethod1() ||
+                    checkRootMethod2() ||
+                    checkRootMethod3() ||
+                    checkForMagiskFiles() ||
+                    checkForBusyboxBinary()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking root status", e)
+            false
+        }
     }
 
     private fun checkRootMethod1(): Boolean {
@@ -53,10 +76,12 @@ class SafeSecureLibs(private val context: Context) {
             "/dev/magisk/mirror"
         )
 
-        for (path in rootPaths) {
-            if (File(path).exists()) return true
+        return try {
+            rootPaths.any { File(it).exists() }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Security exception checking root paths", e)
+            false
         }
-        return false
     }
 
     private fun checkRootMethod2(): Boolean {
@@ -65,15 +90,24 @@ class SafeSecureLibs(private val context: Context) {
             process = Runtime.getRuntime().exec(arrayOf("su"))
             true
         } catch (e: Exception) {
+            Log.e(TAG, "Error executing su command", e)
             false
         } finally {
-            process?.destroy()
+            try {
+                process?.destroy()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error destroying process", e)
+            }
         }
     }
 
     private fun checkRootMethod3(): Boolean {
-        val buildTags = Build.TAGS
-        return buildTags != null && buildTags.contains("test-keys")
+        return try {
+            Build.TAGS?.contains("test-keys") ?: false
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking build tags", e)
+            false
+        }
     }
 
     private fun checkForMagiskFiles(): Boolean {
@@ -87,10 +121,12 @@ class SafeSecureLibs(private val context: Context) {
             "/data/data/com.topjohnwu.magisk"
         )
 
-        for (path in magiskPaths) {
-            if (File(path).exists()) return true
+        return try {
+            magiskPaths.any { File(it).exists() }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Security exception checking Magisk files", e)
+            false
         }
-        return false
     }
 
     private fun checkForBusyboxBinary(): Boolean {
@@ -102,10 +138,12 @@ class SafeSecureLibs(private val context: Context) {
             "/system/sd/xbin/busybox"
         )
 
-        for (path in busyboxPaths) {
-            if (File(path).exists()) return true
+        return try {
+            busyboxPaths.any { File(it).exists() }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Security exception checking Busybox binary", e)
+            false
         }
-        return false
     }
 
     private fun checkForDangerousApps(): Boolean {
@@ -125,42 +163,44 @@ class SafeSecureLibs(private val context: Context) {
             "com.manning.xposed.installer"
         )
 
-        val packageManager = context.packageManager
-        for (appName in dangerousApps) {
-            try {
-                packageManager.getPackageInfo(appName, PackageManager.GET_ACTIVITIES)
-                return true
-            } catch (e: PackageManager.NameNotFoundException) {
-                continue
-            }
-        }
-        return false
-    }
-
-    private fun checkHiddenProperties(): Boolean {
-        val props = arrayOf(
-            "ro.debuggable",
-            "ro.secure",
-            "ro.build.type",
-            "ro.build.tags",
-            "ro.build.selinux"
-        )
-
-        try {
-            val process = Runtime.getRuntime().exec("getprop")
-            val reader = BufferedReader(InputStreamReader(process.inputStream))
-            val output = reader.readText()
-
-            for (prop in props) {
-                if (output.contains("$prop=[1]") ||
-                    output.contains("$prop=[eng]") ||
-                    output.contains("$prop=[userdebug]")) {
-                    return true
+        return try {
+            val packageManager = context.packageManager
+            dangerousApps.any { appName ->
+                try {
+                    packageManager.getPackageInfo(appName, PackageManager.GET_ACTIVITIES)
+                    true
+                } catch (e: PackageManager.NameNotFoundException) {
+                    false
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Error checking dangerous apps", e)
+            false
         }
-        return false
+    }
+
+    private fun checkHiddenProperties(): Boolean {
+        return try {
+            val process = Runtime.getRuntime().exec("getprop")
+            BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
+                val output = reader.readText()
+                val props = arrayOf(
+                    "ro.debuggable",
+                    "ro.secure",
+                    "ro.build.type",
+                    "ro.build.tags",
+                    "ro.build.selinux"
+                )
+
+                props.any { prop ->
+                    output.contains("$prop=[1]") ||
+                            output.contains("$prop=[eng]") ||
+                            output.contains("$prop=[userdebug]")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking hidden properties", e)
+            false
+        }
     }
 }

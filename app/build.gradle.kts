@@ -40,9 +40,9 @@ android {
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "com.application"
+            groupId = 'com.github.bagusandrewijaya'
             artifactId = "safesecure"
-            version = "1.0.0"
+            version = "0.0.20"
 
 
         }
