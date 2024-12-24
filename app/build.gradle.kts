@@ -37,17 +37,7 @@ android {
 }
 
 // Add publishing configuration
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            groupId = "com.application"
-            artifactId = "safesecure"
-            version = "0.0.20"
 
-
-        }
-    }
-}
 
 
 dependencies {
