@@ -1,4 +1,5 @@
 jdk:
   - openjdk17
 before_install:
-  - ./script/prepareJitpackEnvirontment.sh
+  - sdk install java `7.0.7-open
+  - sdk use java 17.0.7-open
