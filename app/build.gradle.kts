@@ -43,9 +43,7 @@ publishing {
             groupId = "com.application"
             artifactId = "safesecure"
             version = "1.0.0"
-            afterEvaluate {
-                from components.release
-            }
+
 
         }
     }
