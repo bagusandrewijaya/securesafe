@@ -28,20 +28,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17 // Ubah ke Java 17
+        targetCompatibility = JavaVersion.VERSION_17 // Ubah ke Java 17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17" // Ubah ke JVM target 17
     }
 }
 
 // Add publishing configuration
 
-
-
 dependencies {
-
     implementation("androidx.activity:activity:1.7.2")
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.core:core:1.10.1")
