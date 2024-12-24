@@ -28,11 +28,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17 // Ubah ke Java 17
-        targetCompatibility = JavaVersion.VERSION_17 // Ubah ke Java 17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "17" // Ubah ke JVM target 17
+        jvmTarget = "11"
     }
 }
 
@@ -43,11 +43,14 @@ publishing {
             from(components["release"])
             groupId = "com.application"
             artifactId = "safesecure"
-            version = "1.0"
+            version = "0.0.24"
         }
     }
 }
+
+
 dependencies {
+
     implementation("androidx.activity:activity:1.7.2")
     implementation("androidx.core:core-ktx:1.10.1")
     implementation("androidx.core:core:1.10.1")
