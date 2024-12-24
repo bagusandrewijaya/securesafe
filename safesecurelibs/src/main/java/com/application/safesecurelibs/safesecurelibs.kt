@@ -8,7 +8,7 @@ import android.provider.Settings
 import java.io.File
 import java.io.BufferedReader
 import java.io.InputStreamReader
-
+//add notes
 class SafeSecureLibs(private val context: Context) {
 
     fun getSecurityStatus(): Map<String, Boolean> {
